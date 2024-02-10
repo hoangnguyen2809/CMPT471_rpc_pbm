@@ -22,6 +22,11 @@ void RegisterServiceClient::OutputRegisterArray(::google::protobuf::internal::Re
     // Task: output the index and value of every item to `out_`
     // Use the following format
     // out_ << "Index: " << index_var << ", Value: " << value_var << std::endl;
+    for (int i = 0; i < it->items_size(); ++i) {
+        uint32_t index = i;
+        uint32_t value = it->items(i);
+        out_ << "Index: " << index << ", Value: " << value << std::endl;
+    }
 }
 
 Result* RegisterServiceClient::GetAllRegisterArrays() {
@@ -30,7 +35,7 @@ Result* RegisterServiceClient::GetAllRegisterArrays() {
     ClientContext context;
 
     // Task: call the GetAllRegisterArrays RPC
-    // Status status = ...
+    Status status = stub_->GetAllRegisterArrays(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
@@ -49,6 +54,11 @@ Result* RegisterServiceClient::GetAllRegisterArrays() {
     // Task: Output the register arrays to `_out`
     // Iterate over all returned arrays
     // call OutputRegisterArray
+    for (auto array : response.arrays().arrays()) {
+        ::google::protobuf::RepeatedPtrField<RegisterArray> tempArray;
+        tempArray.Add()->CopyFrom(array);
+        OutputRegisterArray(tempArray.begin());
+    }
 
     return new Result(status, response);
 }
@@ -56,11 +66,12 @@ Result* RegisterServiceClient::GetAllRegisterArrays() {
 Result* RegisterServiceClient::GetRegisterArray(std::string name) {
     GetRequest request;
     // Task: Set the name of the register array
+    request.set_name(name);
     Response response;
     ClientContext context;
     
     // Task: call the GetRegisterArray RPC
-    // Status status = ...
+    Status status = stub_->GetRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
@@ -73,6 +84,10 @@ Result* RegisterServiceClient::GetRegisterArray(std::string name) {
 
     // Task: Output the returned register array to `_out`
     // call OutputRegisterArray
+    const RegisterArray& array = response.arrays().arrays(0);
+    ::google::protobuf::RepeatedPtrField<RegisterArray> tempArray;
+    tempArray.Add()->CopyFrom(array);
+    OutputRegisterArray(tempArray.begin());
 
     return new Result(status, response);
 }
@@ -80,11 +95,13 @@ Result* RegisterServiceClient::GetRegisterArray(std::string name) {
 Result* RegisterServiceClient::CreateRegisterArray(std::string name, uint32_t capacity) {
     CreateRequest request;
     // Task: Set the name and capacity of the register array
+    request.set_name(name);
+    request.set_capacity(capacity);
     Response response;
     ClientContext context;
     
     // Task: call the CreateRegisterArray RPC
-    // Status status = ...
+    Status status = stub_->CreateRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
@@ -97,11 +114,12 @@ Result* RegisterServiceClient::CreateRegisterArray(std::string name, uint32_t ca
 Result* RegisterServiceClient::DeleteRegisterArray(std::string name) {
     DeleteRequest request;
     // Task: Set the name of the register array
+    request.set_name(name);
     Response response;
     ClientContext context;
 
     // Task: call the DeleteRegisterArray RPC
-    // Status status = ...
+    Status status = stub_->DeleteRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
@@ -114,11 +132,13 @@ Result* RegisterServiceClient::DeleteRegisterArray(std::string name) {
 Result* RegisterServiceClient::ReadValue(std::string name, uint32_t index) {
     ReadItemRequest request;
     // Task: Set the name of the register array, and the index of the item
+    request.set_name(name);
+    request.set_index(index);
     Response response;
     ClientContext context;
 
     // Task: call the ReadValue RPC
-    // Status status = ...
+    Status status = stub_->ReadValue(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
@@ -135,11 +155,14 @@ Result* RegisterServiceClient::ReadValue(std::string name, uint32_t index) {
 Result* RegisterServiceClient::WriteValue(std::string name, uint32_t index, uint32_t value) {
     WriteItemRequest request;
     // Task: Set the name of the register array, and the index and value of the item
+    request.set_name(name);
+    request.set_index(index);
+    request.set_value(value);
     Response response;
     ClientContext context;
 
     // Task: call the WriteValue RPC
-    // Status status = ...
+    Status status = stub_->WriteValue(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
