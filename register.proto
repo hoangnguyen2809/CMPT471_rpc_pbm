@@ -28,6 +28,7 @@ message CreateRequest {
     string name = 1;
     // Task: Define the following field
     // field: capacity, type: uint32
+    uint32 capacity = 2;
 }
 
 message ReadItemRequest {
