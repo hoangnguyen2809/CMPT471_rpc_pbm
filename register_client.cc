@@ -14,13 +14,14 @@ using register_service::ReadItemRequest;
 using register_service::RegisterArray;
 using register_service::Response;
 
+//Constructor
 RegisterServiceClient::RegisterServiceClient(std::shared_ptr<Channel> channel, std::ostream& out)
     : stub_(RegisterService::NewStub(channel)), out_(out) {}
 
+
+//Output the index and value of every item to `out_`
 void RegisterServiceClient::OutputRegisterArray(::google::protobuf::internal::RepeatedPtrIterator<RegisterArray> it) {
     out_ << it->name() << " " << it->capacity() << " " << it->size() << std::endl;
-    // Task: output the index and value of every item to `out_`
-    // Use the following format
     // out_ << "Index: " << index_var << ", Value: " << value_var << std::endl;
     for (int i = 0; i < it->items_size(); ++i) {
         uint32_t index = i;
@@ -34,26 +35,32 @@ Result* RegisterServiceClient::GetAllRegisterArrays() {
     Response response;
     ClientContext context;
 
-    // Task: call the GetAllRegisterArrays RPC
+    // Client uses stub to make RPC GetAllRegisterArrays to the server
     Status status = stub_->GetAllRegisterArrays(&context, request, &response);
+
+    //Check if there is an error
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
         return new Result(status, response);
     }
 
+    //check if response from the server is empty
+    // response_case return enum value indicating the type of response received from the server
+    //ResponseCase::RESPONSE_NOT_SET == no specific response type has been set
     if (response.response_case() == Response::ResponseCase::RESPONSE_NOT_SET) {
         out_ << "[GET] Empty response" << std::endl;
         return new Result(status, response);
     }
 
+    //check if response data is valid or not
+    //kArrays = response data is valid
     if (response.response_case() != Response::ResponseCase::kArrays) {
         out_ << "[Error] [GET] Invalid response" << std::endl;
         return new Result(status, response);
     }
 
-    // Task: Output the register arrays to `_out`
+    //Output the register arrays to `_out`
     // Iterate over all returned arrays
-    // call OutputRegisterArray
     for (auto array : response.arrays().arrays()) {
         ::google::protobuf::RepeatedPtrField<RegisterArray> tempArray;
         tempArray.Add()->CopyFrom(array);
@@ -65,12 +72,12 @@ Result* RegisterServiceClient::GetAllRegisterArrays() {
 
 Result* RegisterServiceClient::GetRegisterArray(std::string name) {
     GetRequest request;
-    // Task: Set the name of the register array
+    // Set the name of the register array
     request.set_name(name);
     Response response;
     ClientContext context;
     
-    // Task: call the GetRegisterArray RPC
+    // Client uses stub to make RPC GetRegisterArray to the server
     Status status = stub_->GetRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
@@ -82,8 +89,7 @@ Result* RegisterServiceClient::GetRegisterArray(std::string name) {
         return new Result(status, response);
     }
 
-    // Task: Output the returned register array to `_out`
-    // call OutputRegisterArray
+    //Output the returned register array to `_out`
     const RegisterArray& array = response.arrays().arrays(0);
     ::google::protobuf::RepeatedPtrField<RegisterArray> tempArray;
     tempArray.Add()->CopyFrom(array);
@@ -94,13 +100,13 @@ Result* RegisterServiceClient::GetRegisterArray(std::string name) {
 
 Result* RegisterServiceClient::CreateRegisterArray(std::string name, uint32_t capacity) {
     CreateRequest request;
-    // Task: Set the name and capacity of the register array
+    //Set the name and capacity of the register array
     request.set_name(name);
     request.set_capacity(capacity);
     Response response;
     ClientContext context;
     
-    // Task: call the CreateRegisterArray RPC
+    // Client uses stub to make RPC CreateRegisterArray to the server
     Status status = stub_->CreateRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
@@ -113,12 +119,12 @@ Result* RegisterServiceClient::CreateRegisterArray(std::string name, uint32_t ca
 
 Result* RegisterServiceClient::DeleteRegisterArray(std::string name) {
     DeleteRequest request;
-    // Task: Set the name of the register array
+    //Set the name of the register array
     request.set_name(name);
     Response response;
     ClientContext context;
 
-    // Task: call the DeleteRegisterArray RPC
+    // Client uses stub to make RPC DeleteRegisterArray to the server
     Status status = stub_->DeleteRegisterArray(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
@@ -131,13 +137,13 @@ Result* RegisterServiceClient::DeleteRegisterArray(std::string name) {
 
 Result* RegisterServiceClient::ReadValue(std::string name, uint32_t index) {
     ReadItemRequest request;
-    // Task: Set the name of the register array, and the index of the item
+    //Set the name of the register array, and the index of the item
     request.set_name(name);
     request.set_index(index);
     Response response;
     ClientContext context;
 
-    // Task: call the ReadValue RPC
+    // Client uses stub to make RPC ReadValue to the server
     Status status = stub_->ReadValue(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
@@ -161,7 +167,7 @@ Result* RegisterServiceClient::WriteValue(std::string name, uint32_t index, uint
     Response response;
     ClientContext context;
 
-    // Task: call the WriteValue RPC
+    // Client uses stub to make RPC WriteValue to the server
     Status status = stub_->WriteValue(&context, request, &response);
     if (!status.ok()) {
         out_ << "[Error:" << status.error_code() << "] " << status.error_message() << std::endl;
